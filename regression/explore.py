@@ -19,7 +19,7 @@ def months_to_years(df):
 
 
 def plot_categorical_and_continuous_vars(df):
-    plt.figure(figsize=(16,8))
+    plt.figure(figsize=(24,8))
     plt.subplot(1,3,1)
     plt.bar(df.tenure_years,df.total_charges)
     plt.xlabel('Tenure in years')
