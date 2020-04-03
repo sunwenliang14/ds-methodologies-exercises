@@ -1,8 +1,11 @@
+import warnings
+warnings.filterwarnings("ignore")
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, PowerTransformer, MinMaxScaler, RobustScaler, QuantileTransformer
 from sklearn.model_selection import train_test_split
 from wrangle import wrangle_telco
+
 
 def split_my_data(df):
     train, test = train_test_split(df, train_size = .80, random_state = 123)
