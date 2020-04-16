@@ -3,38 +3,48 @@ import acquire
 import sklearn.impute
 import sklearn.model_selection
 import sklearn.preprocessing
+import warnings
+warnings.filterwarnings("ignore")
 
 
 
 def encode_species(train,test):
-    encoder = sklearn.preprocessing.OneHotEncoder()
-    encoder.fit(train[['species']])
+    encoder = sklearn.preprocessing.LabelEncoder()
+    train['species'] = encoder.fit_transform(train[['species']])
+    test['species'] = encoder.fit_transform(test[['species']])
+    return train, test
 
-    cols = [ c for c in encoder.categories_[0]]
-
-    m = encoder.transform(train[['species']]).todense()
-    train = pd.concat([
-        train,
-        pd.DataFrame(m, columns=cols, index=train.index)
-    ], axis=1).drop(columns='species')
-
-    m = encoder.transform(test[['species']]).todense()
-    test = pd.concat([
-        test,
-        pd.DataFrame(m, columns=cols, index=test.index)
-    ], axis=1).drop(columns='species')
     
-    return train,test
-
-
-
 def prep_iris():
     iris_df = acquire.get_iris_data()
     iris_df = iris_df.drop(columns= ['species_id', 'measurement_id'])
     iris_df = iris_df.rename(columns = {'species_name': 'species'})
-    train, test = sklearn.model_selection.train_test_split(iris_df, random_state=123, train_size=.8)
+    train, test = sklearn.model_selection.train_test_split(iris_df, random_state=123, train_size=.7)
     train, test = encode_species(train,test)
     
+    return train, test
+
+
+
+
+
+def encode_embarked(train,test):
+    encoder = sklearn.preprocessing.LabelEncoder()
+    train['embarked'] = encoder.fit_transform(train[['embarked']])
+    test['embarked'] = encoder.fit_transform(test[['embarked']])
+    return train, test
+
+def scale_age_and_fare(train,test):
+    train.age = sklearn.preprocessing.MinMaxScaler().fit_transform(train[['age']])
+    test.age = sklearn.preprocessing.MinMaxScaler().fit_transform(test[['age']])
+    train.fare = sklearn.preprocessing.MinMaxScaler().fit_transform(train[['fare']])
+    test.fare = sklearn.preprocessing.MinMaxScaler().fit_transform(test[['fare']])
+    return train, test
+
+def fillna_age(train,test):
+    avg_age = train.age.mean()
+    train.age = train.age.fillna(avg_age)
+    test.age = test.age.fillna(avg_age)
     return train, test
 
 
@@ -43,13 +53,11 @@ def prep_titanic():
     df = df.drop(columns=['deck', 'class','embark_town'])
     df.embarked = df.embarked.fillna('S')
     df.embarked = df.embarked.astype("|S")
-    encoder = sklearn.preprocessing.LabelEncoder()
-    df.embarked = encoder.fit_transform(df.embarked)
-    df.age = sklearn.preprocessing.MinMaxScaler().fit_transform(df[['age']])
-    df.fare = sklearn.preprocessing.MinMaxScaler().fit_transform(df[['fare']])
-    avg_age = df.age.mean()
-    df.age = df.age.fillna(avg_age)
+    train, test = sklearn.model_selection.train_test_split(df, random_state=123, train_size=.8)
+    train, test = encode_embarked(train,test)
+    train, test = scale_age_and_fare(train,test)
+    train, test = fillna_age(train,test)
     
-    return df
+    return train, test 
 
 
