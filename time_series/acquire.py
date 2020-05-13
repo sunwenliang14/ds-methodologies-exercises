@@ -12,6 +12,8 @@ def get_store_data_from_api():
     data = response.json()
     return pd.DataFrame(data['payload']['stores'])
 
+#get_store_data_from_api()
+
 def get_item_data_from_api():
     url = API_BASE + '/items'
     response = requests.get(url)
@@ -27,6 +29,8 @@ def get_item_data_from_api():
         stores += data['payload']['items']
 
     return pd.DataFrame(stores)
+
+#get_item_data_from_api()
 
 def get_sale_data_from_api():
     url = API_BASE + '/sales'
@@ -44,12 +48,16 @@ def get_sale_data_from_api():
 
     return pd.DataFrame(stores)
 
+#get_sale_data_from_api()
+
 def get_store_data(use_cache=True):
     if use_cache and path.exists('stores.csv'):
         return pd.read_csv('stores.csv')
     df = get_store_data_from_api()
     df.to_csv('stores.csv', index=False)
     return df
+
+#get_store_data(use_cache=True)
 
 def get_item_data(use_cache=True):
     if use_cache and path.exists('items.csv'):
@@ -58,12 +66,26 @@ def get_item_data(use_cache=True):
     df.to_csv('items.csv', index=False)
     return df
 
+#get_item_data(use_cache=True)
+
 def get_sale_data(use_cache=True):
     if use_cache and path.exists('sales.csv'):
         return pd.read_csv('sales.csv')
     df = get_sale_data_from_api()
     df.to_csv('sales.csv', index=False)
     return df
+
+#get_sale_data(use_cache=True)
+
+def get_opsd_data(use_cache=True):
+    if use_cache and path.exists('opsd.csv'):
+        return pd.read_csv('opsd.csv')
+    df = pd.read_csv('https://raw.githubusercontent.com/jenfly/opsd/master/opsd_germany_daily.csv')
+    df.to_csv('opsd.csv', index=False)
+    return df
+
+#get_opsd_data(use_cache=True)
+
 
 def get_all_data(use_cache=True):
     sales = get_sale_data()
@@ -72,11 +94,4 @@ def get_all_data(use_cache=True):
 
     sales = sales.rename(columns={'item': 'item_id', 'store': 'store_id'})
 
-    return sales.merge(items, on='item_id').merge(stores, on='store_id')
-
-def get_opsd_data(use_cache=True):
-    if use_cache and path.exists('opsd.csv'):
-        return pd.read_csv('opsd.csv')
-    df = pd.read_csv('https://raw.githubusercontent.com/jenfly/opsd/master/opsd_germany_daily.csv')
-    df.to_csv('opsd.csv', index=False)
-    return df
+    return sales.merge(items, on='item_id').merge(stores, on='store_id').drop(columns='Unnamed: 0')
