@@ -18,8 +18,8 @@ def prep_sales_data():
 
 def diff_between_sales():
     sales_total = df.resample("D")[['sales_total']].sum()
-    sales_total['sales_differences'] = sales_sum['sales_total'].diff()
-    return sales_total
+    sales_total['sales_differences'] = sales_total['sales_total'].diff()
+    return sales_total.head()
 
 
 def prep_ops():
