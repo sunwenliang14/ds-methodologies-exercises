@@ -12,11 +12,20 @@ def prep_sales_data():
     df["month"] = df.index.month_name()
     df["day_of_week"] = df.index.day_name()
     df['sales_total'] = df.sale_amount * df.item_price
-    return df.head()
+    return df
 
 
 
 def diff_between_sales():
     sales_total = df.resample("D")[['sales_total']].sum()
     sales_total['sales_differences'] = sales_sum['sales_total'].diff()
-    return sales_total.head()
+    return sales_total
+
+
+def prep_ops():
+    ops = acquire.get_opsd_data()
+    ops['Date'] = pd.to_datetime(ops['Date'])
+    ops = ops.sort_values('Date').set_index('Date')
+    ops['month'] = ops.index.month
+    ops['year'] = ops.index.year
+    return ops
